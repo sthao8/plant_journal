@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Lookup
+{% endblock %}
+
+{% block main %}
+    <h1 class="mb-5">Plant Lookup</h1>
+
+    <form action="/search-results" method="get">
+
+        <div class="form-floating mb-3 w-100">
+            <input type="text" class="form-control" name="name" id="name" placeholder="Plant name or category" autofocus autocomplete="off" required>
+            <label for="name">Plant name or category</label>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button class="btn btn-light" type="submit">Search</button>
+        </div>
+    </form>
+
+{% endblock %}

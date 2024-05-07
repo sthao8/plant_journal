@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Plant Journal
+{% endblock %}
+
+{% block main %}
+    {% if 'user_id' not in session %}
+        <h1>Register or log in to see your plant journal!</h1>
+
+    {% elif inventory is none %}
+        <h1>Journal is empty!</h1>
+        <h3>Add plants to start journaling!</h3>
+    {% else %}
+    <div class="row">
+        <h1>Plant Journal</h1>
+    </div>
+    <div class="row">
+        <h3>By {{ username|capitalize }}</h3>
+    </div>
+    <br>
+    <div class="row d-flex flex-grow-1" style="min-height: 0px;">
+        <div class="container-lg d-flex flex-column flex-grow-1" id="contentsPage" style="max-width: 900px; max-height: 100%; min-height: 0px;">
+            <div class="card text-bg-light d-flex flex-column" style="max-height: 100%; min-height: 0px;">
+                <div class="card-header bg-light-subtle">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h4 class="mb-1">Table of Contents</h4>
+                        <small>page 1</small>
+                    </div>
+                    <p class="text-secondary mb-1" style="text-align: left;">Index page</p>
+                </div>
+                <div class="d-flex flex-column container overflow-y-auto w-100" style="max-height: 100%; min-height: 0px;">
+                    <div class="list-group list-group-flush">
+                        {% for plant in inventory %}
+                            <a href="{{ url_for('plant_page', plant_alias=plant['alias'])}}" class="list-group-item list-group-item-action" aria-current="true">
+                                <div class="d-flex w-100 justify-content-between mb-1">
+                                    <h4 class="mb-0 ">{{ plant['alias'] }}</h4>
+                                    <small>page {{ loop.index0 + 2 }}</small>
+                                </div>
+                                <p class="mx-1 text-secondary" style="text-align: left;"><i> {{ latest_updates[ plant['alias']] }} </i></p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+    <script>
+        inventory_info = {{ inventory | tojson | safe }}; //list of dicts
+        var previousButtonElement = document.querySelector("#previousButton");
+        var nextButtonElement = document.querySelector("#nextButton");
+        var plantPageElements = document.querySelectorAll(".plant-page");
+
+
+        plantPageElements.forEach(plantPage => {
+            plantPage.addEventListener("click", function() {
+                previousButtonElement.classList.remove("disabled");
+                nextButtonElement.classList.remove("disabled");
+                plantPageElements.forEach(pageButton => pageButton.classList.remove("active"));
+
+                plantPage.classList.add("active");
+                if (plantPage.dataset.value == 1) {
+                    previousButtonElement.classList.add("disabled");
+                }
+                else if (plantPage.dataset.value == inventory_info.length + 1) {
+                    nextButtonElement.classList.add("disabled");
+                }
+            });
+        });
+    </script>
+
+
+{% endblock %}

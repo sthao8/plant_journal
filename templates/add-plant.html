@@ -1,0 +1,295 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Add Plant
+{% endblock %}
+
+{% block main %}
+    <form action="/search-results" method="get">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="name" id="name" placeholder="Plant name or category" value="{{search_terms}}" autocomplete="off" aria-label="search terms" aria-describedby="search-button" required>
+            <button class="btn btn-light" id="search-button" type="submit">Search</button>
+        </div>
+    </form>
+    {% if not info %}
+        <div class="mt-5 pt-3 text-center">
+            <h3>&#129344;No results found for "{{ search_terms }}"!</h3>
+        </div>
+    {% else %}
+        <h4>{{number_of_results}} results found for "{{ search_terms }}"</h4>
+        <small>showing 10 results per page</small>
+
+        <div class="row row-cols-1 row-cols-lg-2 g-4 px-3 pt-4 pb-5">
+        {% for plant in info %}
+            <div class="col">
+                <div class="card text-bg-light border-secondary h-100">
+                    <div class="row g-0">
+                        <div class="col-lg-4 d-flex align-items-center justify-content-center" style="background-color: black;">
+                            <img class="rounded img-fluid" src="{{ plant['Img'] }}" alt="plant image">
+                        </div>
+                        <div class="col-lg-8 right-text">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title"> {{ plant['Latin name'] }} </h5>
+                                <p class="card-text">
+                                    <ul>
+                                        <li>
+                                            Categories: {{ plant['Categories'] }}
+                                        </li>
+                                        <li>
+                                            Climate: {{ plant['Climat'] }}
+                                        </li>
+                                        <li>
+                                            Availibility: {{ plant['Avaibility'] }}
+                                        </li>
+                                    </ul>
+                                </p>
+
+                                <p class="card-text">
+                                    <small class="text-body-light" id="commonName">
+                                        Common name(s):
+                                            {% if plant['Common name'] is not none %}
+                                                {% for name in plant['Common name'] %}
+                                                    {{- name -}}
+                                                        {%- if loop.index0 < (plant['Common name']|length - 1) -%}
+                                                        ,
+                                                        {%- endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                None
+                                            {% endif %}
+                                    </small>
+                                </p>
+
+                                <div class="d-grid gap-2 mt-auto">
+                                    <button class="btn btn-secondary plantSelect" data-index="{{ loop.index0 }}" name="plantSelect" data-bs-toggle="modal" data-bs-target="#addPlantDetails">Add Plant</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+
+        <div class="d-flex fixed-bottom justify-content-center">
+            <nav aria-label="pages navigation mt-auto">
+                <ul class="pagination">
+                    <li class="page-item">
+                        <a id="previousButton" class="page-link" href="/search-results?name={{search_terms}}&page={{page - 1}}">Previous</a>
+                    </li>
+                    {% for page_number in range(1, pages + 1) %}
+                        <li class="page-item nav-page-number" id="page-number{{page_number}}">
+                            <a class="page-link" href="/search-results?name={{search_terms}}&page={{page_number}}">{{ page_number }}</a>
+                        </li>
+                    {% endfor %}
+                    <li class="page-item">
+                        <a id="nextButton" class="page-link" href="/search-results?name={{search_terms}}&page={{page + 1}}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="modal fade" id="addPlantDetails" tabindex="-1" aria-labelledby="addPlantLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-fullscreen-md-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5 text-dark" id="addPlantLabel">Add Plant to Journal</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <form action="/add-plant" method="post" id="addPlantForm">
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" name="latin_name" id="latinName" placeholder="Latin Name" readonly autocomplete="off">
+                                <label for="latinName" id="nameLabel">Latin name</label>
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Plant alias*</span>
+                                <button type="button" class="btn btn-light dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" id="plantAlias2">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" id="commonNamesToggle">Choose from common names</a></li>
+                                    <li><a class="dropdown-item" href="#" id="nicknameToggle">Enter custom nickname</a></li>
+                                </ul>
+                                <input type="text" id="nicknameField" name="alias" class="form-control" placeholder="Custom nickname..." autocomplete="off" aria-describedby="aliasHelp" required>
+                                <div id="aliasHelp" class="form-text">Plant aliases must be unique to your journal</div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" name="date_acquired" id="dateAcquired" autocomplete="off" required>
+                                <label for="dateAcquired">Date acquired*</label>
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <button type="button" id="acquireMethodLabel" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Acquired</button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item acquireMethods" href="#" data-value="Gift">Gift</a></li>
+                                    <li><a class="dropdown-item acquireMethods" href="#" data-value="Purchase">Purchase</a></li>
+                                </ul>
+                                <input type="text" class="form-control" id="acquireFrom" name="acquire_from" placeholder="From store, person, greenhouse..." autocomplete="off">
+                                <input type="hidden" name="acquire_method" id="acquireMethod">
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <textarea class="form-control" name="notes" id="notes" placeholder="Notes" style="height: 250px;"></textarea>
+                                <label for="notes">Notes</label>
+                            </div>
+
+                            <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-light" type="submit">Add plant</button>
+                            </div>
+
+                            <div class="modal-footer text-secondary">
+                                <input type="hidden" name="api_id" id="apiID">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <script>
+
+        var plantsInfo = {{ info| tojson | safe }};
+        var selectedPlantElements = document.querySelectorAll(".plantSelect");
+
+        if (plantsInfo) {
+            selectedPlantElements.forEach(function(plantElement) {
+                plantElement.addEventListener("click", function(event) {
+                    var nameLabel = document.querySelector("#nameLabel");
+                    var nameElement = document.querySelector("#latinName");
+                    var apiIDElement = document.querySelector("#apiID");
+                    var index = this.getAttribute("data-index");
+
+                    var dateAcquiredElement = document.querySelector("#dateAcquired");
+
+                    // get info to prepopulate the add-plant-details modal for selected plant
+                    var selectedPlant = plantsInfo[index];
+                    var name = selectedPlant['Latin name'];
+                    var id = selectedPlant['id'];
+                    common_names = selectedPlant['Common name'];
+                    nameElement.value = name;
+                    apiIDElement.value = id;
+
+                    // if common names exist, put them as options in the select, else None
+                    let options;
+                    if (common_names) {
+                        options = common_names.map(name => `<option value="${name}">${name}</option>`).join('');
+                    }
+                    else {
+                        options = `<option value="">None</option>`;
+                    }
+
+                    // create the new alias elements every time a new plant is selected to get proper names
+                    let commonNamesElement = document.createElement("select");
+                    commonNamesElement.id = "nicknameField";
+                    commonNamesElement.name = "alias";
+                    commonNamesElement.className = "form-select";
+                    let defaultOption = '<option value="">Common names</option>';
+                    commonNamesElement.innerHTML = defaultOption + options;
+                    commonNamesElement.required = true;
+
+                    let nicknameElement = document.createElement("input");
+                    nicknameElement.type = "text";
+                    nicknameElement.name = "alias"
+                    nicknameElement.id = "nicknameField";
+                    nicknameElement.className = "form-control";
+                    nicknameElement.placeholder = "Custom nickname...";
+                    nicknameElement.autocomplete = "off";
+                    nicknameElement.required = true;
+
+                    // replace between common name and nickname when they are toggled
+                    var aliasInputElement = document.querySelector("#nicknameField");
+                    var commonNamesToggleElement = document.querySelector("#commonNamesToggle");
+                    var nicknameToggleElement = document.querySelector("#nicknameToggle");
+
+                    function replaceNicknameField(newElement) {
+                        aliasInputElement.replaceWith(newElement);
+                        aliasInputElement = document.querySelector("#nicknameField");
+                    }
+
+                    replaceNicknameField(nicknameElement);
+
+                    commonNamesToggleElement.addEventListener("click", function(event) {
+                        replaceNicknameField(commonNamesElement);
+                        event.preventDefault();
+                    });
+                    nicknameToggleElement.addEventListener("click", function(event) {
+                        replaceNicknameField(nicknameElement);
+                        event.preventDefault();
+                    });
+
+                    // auto-focus to input field when modal is opened
+                    const plantDetailsModal = document.getElementById('addPlantDetails');
+
+                    plantDetailsModal.addEventListener('shown.bs.modal', () => {
+                        aliasInputElement.focus();
+                    });
+
+                    // reset the inputs every time a new plant is selected
+                    dateAcquiredElement.value = "";
+                    document.querySelector("#notes").value = "";
+                    document.querySelector("#acquireFrom").value = "";
+
+                    var acquireMethodLabelElement = document.querySelector("#acquireMethodLabel");
+                    var acquireMethodElements = document.querySelectorAll(".acquireMethods");
+                    var acquireMethodElement = document.querySelector("#acquireMethod");
+
+                    acquireMethodLabelElement.textContent = "Acquired";
+
+                    acquireMethodElements.forEach(function(acquireMethodListElement) {
+                        acquireMethodListElement.addEventListener("click", function(event) {
+                            acquireMethodLabelElement.textContent = acquireMethodListElement.dataset.value;
+                            acquireMethodElement.setAttribute("value", acquireMethodListElement.dataset.value);
+                            event.preventDefault();
+                        });
+                    });
+                    event.preventDefault();
+
+                    // don't allow form submission without alias and date acquired
+                    const addPlantForm = document.querySelector("#addPlantForm");
+                    addPlantForm.addEventListener("submit", function(event) {
+                        if (!aliasInputElement.value || !dateAcquiredElement.value) {
+                            event.preventDefault();
+                            alert("Please fill in plant alias and date acquired before submitting!");
+                        }
+                    });
+                });
+            });
+
+            // handle the pagination at the bottom according to current page number
+            var current_page = {{ page| tojson | safe }};
+            var total_pages = {{ pages| tojson | safe }};
+            var navPageNumberElements = document.querySelectorAll(".nav-page-number");
+
+            navPageNumberElements.forEach(function(navPageNumberElement) {
+                navPageNumberElement.classList.remove('avtive');
+                if (current_page == navPageNumberElement.value) {
+                    navPageNumberElement.classList.add('active');
+                }
+            });
+
+            const previousButtonElement = document.querySelector("#previousButton");
+            const nextButtonElement = document.querySelector("#nextButton");
+
+            if (current_page == 1) {
+                const disabledPreviousNavButton = document.createElement("span");
+                disabledPreviousNavButton.classList.add('page-link');
+                disabledPreviousNavButton.textContent = "Previous";
+                previousButtonElement.replaceWith(disabledPreviousNavButton);
+            }
+            if (current_page == total_pages) {
+                const disabledNextNavButton = document.createElement("span");
+                disabledNextNavButton.classList.add('page-link');
+                disabledNextNavButton.textContent = "Next";
+                nextButtonElement.replaceWith(disabledNextNavButton);
+            }
+        }
+
+    </script>
+{% endblock %}

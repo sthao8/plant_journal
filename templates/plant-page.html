@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Plant Page
+{% endblock %}
+
+{% block main %}
+<div class="d-flex align-items-center">
+    <div class="container">
+        <div class="container text-start">
+            <h1>{{ plant_info['alias'] }}</h1>
+            <h4>{{ latin_name }}</h4>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 h-75">
+                <div class="card mb-3">
+                    <img src="/static/placeholder.png" class="card-img-top" alt="boston fern plant" style="max-height: 655px;">
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <input type="file" class="form-control" id="plantImageFile">
+                            <label class="input-group-text" for="plantImageFile">Upload</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8 container-lg text-start d-flex flex-column" style="max-height: 655px;">
+                <div class="accordion overflow-y-auto mb-3" id="entriesAccordion">
+                {% for entry in journal_entries %}
+                    {% set emoji = event_strings[entry['event_type']][0] %}
+                    {% set event_string = event_strings[entry['event_type']][1] %}
+
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <div class="accordion-button w-100 text-dark" role="button" data-bs-toggle="collapse" data-bs-target="#entry{{ loop.index0 }}" aria-expanded="true" style="border: none; background-color: transparent;">
+                                    <div class="container">
+                                        <div class="row d-flex">
+                                            <div class="col-sm-1 d-flex justify-content-center align-items-center" style="display: inline-block">
+                                                <h1>{{ emoji|safe }}</h1>
+                                            </div>
+                                            <div class="col-sm-auto flex-grow-1 text-start">
+                                                <div>
+                                                    <h4>{{ event_string }}</h4>
+                                                    <h5>{{ entry['event_date'] }}</h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-auto">
+                                                <small><i>Logged: {{ entry['entry_date'] }}</i></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="entry{{ loop.index0 }}" class="accordion-collapse collapse" data-bs-parent="#entriesAccordion">
+                                <div class="accordion-body text-secondary">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col-sm text-start ps-3">
+                                                <ul>
+                                                    {% if entry['additional_details'] %}
+                                                        {% for string in entry['additional_details'] %}
+                                                        <li>{{ string }}</li>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <li>No details here!</li>
+                                                    {% endif %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                {% endfor %}
+                </div>
+                <button class="btn btn-light sticky-bottom mt-auto plantSelect" name="add_entry" data-bs-toggle="modal" data-bs-target="#addEntryModal">Write journal entry</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addEntryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-fullscreen-md-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-dark" id="addPlantLabel">Add Journal Entry</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <form action="/add-journal-entry" method="post" id="addEntryForm">
+
+                        <div class="form-floating mb-3">
+                            <input value="{{ plant_info['alias'] }}" type="text" class="form-control" name="plant_alias" id="plantAlias" placeholder="Alias" readonly autocomplete="off">
+                            <label for="plantAlias" id="nameLabel">Alias</label>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="entryTypeSelect">Event Type*</label>
+                            <select name="event_type" required class="form-select" id="entryTypeSelect">
+                                <option value="" selected>Choose...</option>
+                                <option value="2">Watering</option>
+                                <option value="3">Fertilizing</option>
+                                <option value="4">Treatment</option>
+                                <option value="5">Repotting</option>
+                                <option value="6">Death of Plant</option>
+                            </select>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="date" class="form-control" name="event_date" id="eventDate" autocomplete="off" required>
+                            <label for="eventDate">Date of event*</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" name="notes" id="notes" placeholder="Notes" style="height: 250px;"></textarea>
+                            <label for="notes">Notes</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-light" type="submit">Add journal entry</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script>
+        var entries = {{ journal_entries | tojson | safe }}
+
+        // load page with scroll at bottom of entries container
+        var scrollContainer = document.getElementById('entriesAccordion');
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+
+        // autofocus on field when modal popsup
+        const addEntryModal = document.getElementById('addEntryModal');
+        const eventTypeElement = document.getElementById('entryTypeSelect');
+
+        addEntryModal.addEventListener('shown.bs.modal', () => {
+            eventTypeElement.focus();
+        });
+
+        // disallow submit until all required fields are filled out
+        const addEntryForm = document.getElementById('addEntryForm');
+        const eventDateInput = document.getElementById('eventDate');
+
+        addEntryForm.addEventListener("submit", function(event) {
+            if (!eventTypeElement.value || !eventDateInput.value) {
+                event.preventDefault();
+                alert("Please fill in event type and date before submitting!");
+            }
+        });
+
+    </script>
+
+{% endblock %}

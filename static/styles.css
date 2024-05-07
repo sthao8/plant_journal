@@ -1,0 +1,80 @@
+.with-padding
+{
+    padding-right: 10px;
+}
+
+label
+{
+    display: block;
+}
+
+form
+{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    max-width: 600px;
+    text-align: left;
+    min-width: 250px;
+}
+
+input, select
+{
+    width: 100%;
+    max-width: 600px;
+    min-width: 250px;
+}
+
+body
+{
+    background-image: url('/static/cactus.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    background-color: #d98ca6;
+    color: white;
+}
+
+.centered
+{
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 500px;
+    padding: 50px;
+}
+
+.center
+{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+label
+{
+    color: grey;
+}
+
+.right-text
+{
+    text-align: left;
+}
+
+.modal-header img
+{
+    width: 250px;
+    height: 250px;
+}
+
+.center_list
+{
+    display: table;
+    margin: 0 auto;
+}
+
+.checked
+{
+    color: green;
+}
+

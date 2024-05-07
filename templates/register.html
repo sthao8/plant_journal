@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+
+    <div class="container-md rounded justify-content-center align-items-center text-dark bg-light py-5 my-5" style="max-width: 600px;">
+        <h1 class="mb-5">Register</h1>
+
+        <form action="/register" method="post" id="registerForm">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">@</span>
+                <input type="text" id="registerUsername" name="registerUsername" class="form-control" placeholder="Username*" aria-label="Username" aria-describedby="basic-addon1" autocomplete="off" autofocus required>
+            </div>
+
+            <div class="mb-3">
+                <input type="password" class="form-control" id="registerPassword" name="registerPassword" placeholder="Password*" autocomplete="off" required>
+            </div>
+
+            <div class="mb-3">
+                <input type="password" class="form-control" id="registerPasswordConfirm" name="registerPasswordConfirm" placeholder="Confirm password*" autocomplete="off" required>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button class="btn btn-secondary" id="registerButton" type="submit">Register</button>
+            </div>
+
+        </form>
+
+        <br>
+        <section>
+            <h4>Password requirements:</h4>
+            <ul class="center_list" style="text-align: left;">
+                <li id="length_test">At least 8 characters</li>
+                <li id="lowercase_test">One lowercase letter</li>
+                <li id="uppercase_test">One uppercase letter</li>
+                <li id="digit_test">One digit</li>
+                <li id="symbol_test">One symbol: !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ </li>
+            </ul>
+        </section>
+    </div>
+
+    <script>
+
+        // Criteria at bottom of page lights up green if password passes check
+        let input = document.querySelector("#registerPassword");
+        let length_tag = document.querySelector("#length_test");
+        let lowercase_tag = document.querySelector("#lowercase_test");
+        let uppercase_tag = document.querySelector("#uppercase_test");
+        let digit_tag = document.querySelector("#digit_test");
+        let symbol_tag = document.querySelector("#symbol_test");
+
+        // make a map coupling tag and its criteria for each test
+        let password_checks = new Map();
+        password_checks.set(length_tag, /.{8,}/);
+        password_checks.set(symbol_tag, /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/);
+        password_checks.set(lowercase_tag, /[a-z]/);
+        password_checks.set(uppercase_tag, /[A-Z]/);
+        password_checks.set(digit_tag, /\d/);
+
+        input.addEventListener('keyup', function(event) {
+            for (let [tag, criteria] of password_checks.entries()) {
+                if (criteria.test(input.value)) {
+                    tag.classList.add("checked");
+                }
+                else {
+                    tag.classList.remove("checked");
+                }
+            }
+        });
+
+        const form = document.querySelector("#registerForm");
+        const registerPasswordInputElement = document.querySelector("#registerPassword");
+        const registerPasswordConfirmInputElement = document.querySelector("#registerPasswordConfirm");
+
+        // Do not let form submit unless all checks cleared
+        form.addEventListener("submit", function(event) {
+            for (let tag of password_checks.keys()) {
+                if (!tag.classList.contains("checked")) {
+                    event.preventDefault();
+
+                    alert("Please meet all password requirements before submitting.");
+                    break;
+                }
+            }
+
+            if (registerPasswordConfirmInputElement.value != registerPasswordInputElement.value) {
+                event.preventDefault();
+
+                alert("Passwords don't match!");
+            }
+        });
+
+    </script>
+
+{% endblock %}

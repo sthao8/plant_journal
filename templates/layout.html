@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+
+        <!-- https://getbootstrap.com/docs/5.3/getting-started/introduction/ -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+        <!-- https://favicon.io/favicon-generator/ -->
+        <link href="/static/favicon.ico" rel="icon">
+
+        <link href="/static/styles.css" rel="stylesheet">
+
+        <title>Plant Journal: {% block title %}{% endblock %}</title>
+
+    </head>
+    <body>
+        <nav class="navbar sticky-top navbar-expand-lg" style="background-color: #F8F8FF;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">
+                    <img src="/static/favicon-32x32.png" alt="icon" class="with-padding">Plant Journal
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarItems" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarItems">
+                    <ul class="navbar-nav me-auto my-2 my-lg-0">
+                        <li class="nav-item" >
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/lookup">Add Plant</a>
+                        </li>
+                    </ul>
+                    {% if session['user_id'] %}
+                        <a class="nav-item nav-link text-dark" href="/logout">Logout</a>
+                    {% else %}
+                    <ul class="navbar-nav ms-auto my-2 my-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/register">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-item nav-link text-dark" id="loginModalButton" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+                        </li>
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <div class="modal fade" id="loginModal" tabindex="-1">
+            <div class="modal-dialog modal-fullscreen-md-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <img src="/static/avatar.png" alt="avatar" class="rounded-circle center">
+                    </div>
+
+                    <div class="modal-body text-dark">
+                        <div class="text-center mb-5">
+                            <h1>Welcome back,</h1>
+                            <h1>plant lover!</h1>
+                        </div>
+
+                        <form action="/login" method="post" id="loginForm">
+
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" name="username" id="username" placeholder="Username*" autocomplete="off" required>
+                                <label for="username">Username</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" name="password" id="password" placeholder="Password*" autocomplete="off" required>
+                                <label for="password">Password</label>
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button class="btn btn-light" type="submit">Login</button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <div class="modal-footer">
+                        <a href="/register" class="btn btn-light d-grid mb-3" role="button">Register</a>
+
+                        <div class="d-grid mb-3">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if get_flashed_messages() %}
+        <header>
+            <div class="alert alert-light mb-0 text-center" role="alert">
+                {{ get_flashed_messages() | join(" ") }}
+            </div>
+        </header>
+        {% endif %}
+
+        <main class="container-fluid d-flex flex-column py-4 text-center" style="height: calc(100vh - 60px); max-height: calc(100vh - 60px); min-height: 0px;">
+            {% block main %}{% endblock %}
+        </main>
+
+        <script>
+
+            // Add active class to active link in navbar
+            let current_path = window.location.pathname;
+            let navbar_items = document.querySelectorAll('.nav-link');
+
+            navbar_items.forEach(function(navbar_item) {
+                if (navbar_item.getAttribute('href') == current_path) {
+                    navbar_item.classList.add('active');
+                }
+            });
+
+            // from https://getbootstrap.com/docs/5.3/components/modal/
+            const myModal = document.getElementById('loginModal');
+            const myInput = document.getElementById('username');
+
+            myModal.addEventListener('shown.bs.modal', () => {
+            myInput.focus()
+            });
+
+            // Prevent a tag from scrolling up
+            const modalButtonElement = document.getElementById('loginModalButton');
+            if (modalButtonElement) {
+                modalButtonElement.addEventListener("click", function(event) {
+                    event.preventDefault();
+                });
+            }
+
+            // Prevent form submission if not all required fields filled out
+            const loginForm = document.querySelector("#loginForm");
+            const usernameInputElement = document.querySelector("#username");
+            const passwordInputElement = document.querySelector("#password");
+
+            loginForm.addEventListener("submit", function(event) {
+                if (!usernameInputElement.value || !passwordInputElement.value) {
+                    event.preventDefault();
+
+                    alert("Please fill in username and password before submitting!");
+                }
+            });
+
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    </body>
+</html>
