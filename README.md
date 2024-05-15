@@ -1,4 +1,6 @@
-PLANT JOURNAL
+PLANT JOURNAL:
+This is my final project for CS50 that I submitted in 2023, one of my very first bigger projects! 
+
 ### Video Demo: [Youtube Video](https://youtu.be/BaNxcV-AOuY)
 ### Description:
 #### Purpose:
